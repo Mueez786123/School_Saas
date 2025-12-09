@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container-fluid">
+    
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold text-dark mb-0">🎓 Students Directory</h3>
+            <p class="text-muted small mb-0">Total Active Students: <strong>{{ students.count }}</strong></p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'bulk_upload_students' %}" class="btn btn-light border shadow-sm fw-bold text-success">
+                <i class="bi bi-file-earmark-spreadsheet"></i> Bulk Upload
+            </a>
+            <a href="{% url 'student_admission' %}" class="btn btn-primary fw-bold shadow-sm">
+                <i class="bi bi-person-plus-fill"></i> New Admission
+            </a>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px; background: #fff;">
+        <div class="card-body p-2">
+            <form method="get" class="row g-2 align-items-center">
+                <div class="col-md-10">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-0 ps-3"><i class="bi bi-search text-muted"></i></span>
+                        <input type="text" name="search" class="form-control border-0 shadow-none ps-2" 
+                               placeholder="Search by Name, Admission No, or Father's Mobile..." 
+                               value="{{ search_query }}" style="background: transparent;">
+                    </div>
+                </div>
+                <div class="col-md-2 d-grid">
+                    <button type="submit" class="btn btn-dark" style="border-radius: 8px;">Search</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm" style="border-radius: 12px; overflow: hidden;">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light text-uppercase text-muted small">
+                    <tr>
+                        <th class="py-3 ps-4" width="10%">Adm. No</th>
+                        <th class="py-3" width="25%">Student Info</th>
+                        <th class="py-3" width="20%">Class Info</th>
+                        <th class="py-3" width="15%">Father / Mobile</th>
+                        <th class="py-3" width="10%">Status</th>
+                        <th class="py-3 text-end pe-4" width="20%">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in students %}
+                    <tr style="border-bottom: 1px solid #f0f0f0;">
+                        <td class="ps-4">
+                            <span class="badge bg-light text-dark border">#{{ student.admission_no }}</span>
+                        </td>
+                        
+                        <td>
+                            <div class="d-flex align-items-center">
+                                {% if student.photo %}
+                                    <img src="{{ student.photo.url }}" 
+                                         class="rounded-circle border me-3" 
+                                         width="45" height="45" 
+                                         style="object-fit: cover;" 
+                                         loading="lazy">
+                                {% else %}
+                                    <div class="rounded-circle bg-primary bg-opacity-10 text-primary fw-bold d-flex justify-content-center align-items-center me-3" 
+                                         style="width: 45px; height: 45px; font-size: 18px;">
+                                        {{ student.first_name|first|upper }}
+                                    </div>
+                                {% endif %}
+                                
+                                <div class="d-flex flex-column justify-content-center">
+                                    <h6 class="mb-0 fw-bold text-dark">{{ student.first_name }} {{ student.last_name }}</h6>
+                                    <small class="text-muted" style="font-size: 11px;">
+                                        {% if student.gender == 'M' %} Male 
+                                        {% elif student.gender == 'F' %} Female 
+                                        {% else %} Other {% endif %}
+                                    </small>
+                                </div>
+                            </div>
+                        </td>
+
+                        <td>
+                            <div class="d-flex flex-column">
+                                <span class="fw-semibold text-dark">{{ student.current_class.name }}</span>
+                                <small class="text-muted">Section: {{ student.section.name|default:"-" }}</small>
+                            </div>
+                        </td>
+
+                        <td>
+                            <div class="d-flex flex-column">
+                                <span class="text-dark small"><i class="bi bi-person"></i> {{ student.father_name }}</span>
+                                <span class="text-muted small"><i class="bi bi-phone"></i> {{ student.father_mobile }}</span>
+                            </div>
+                        </td>
+
+                        <td>
+                            {% if student.status == 'active' %}
+                                <span class="badge rounded-pill bg-success bg-opacity-10 text-success px-3">Active</span>
+                            {% elif student.status == 'inactive' %}
+                                <span class="badge rounded-pill bg-warning bg-opacity-10 text-warning px-3">Inactive</span>
+                            {% else %}
+                                <span class="badge rounded-pill bg-danger bg-opacity-10 text-danger px-3">Left</span>
+                            {% endif %}
+                        </td>
+
+                        <td class="text-end pe-4">
+                            <a href="{% url 'student_profile' student.pk %}" class="btn btn-sm btn-outline-primary fw-bold rounded-pill px-3 shadow-sm">
+                                <i class="bi bi-eye-fill me-1"></i> View Profile
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center py-5">
+                            <div class="text-muted">
+                                <i class="bi bi-search display-4 d-block mb-3 opacity-25"></i>
+                                <h5>No Students Found</h5>
+                                <p class="small">Try searching with a different keyword or add a new student.</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

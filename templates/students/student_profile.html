@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    @media print {
+        body * { visibility: hidden; }
+        .printable-area, .printable-area * { visibility: visible; }
+        .printable-area { position: absolute; left: 0; top: 0; width: 100%; }
+        .no-print { display: none !important; }
+    }
+    /* Button spacing for better look */
+    .action-btn { margin-right: 5px; margin-bottom: 5px; }
+</style>
+
+<div class="container printable-area">
+    <div class="card shadow-lg border-0">
+        
+        <div class="card-header bg-primary text-white">
+            <div class="d-flex justify-content-between align-items-center flex-wrap">
+                <h4 class="mb-0">📄 Student Profile</h4>
+                
+                <div class="no-print mt-2 mt-md-0">
+                    <a href="{% url 'student_edit' student.pk %}" class="btn btn-warning btn-sm fw-bold action-btn text-dark">
+                        ✏️ Edit
+                    </a>
+
+                    <a href="{% url 'student_fee_ledger' student.pk %}" class="btn btn-success btn-sm fw-bold action-btn">
+                        💰 Fees
+                    </a>
+
+                    <a href="{% url 'generate_id_card' student.pk %}" target="_blank" class="btn btn-info btn-sm fw-bold action-btn text-white">
+                        🪪 ID Card
+                    </a>
+
+                    <a href="{% url 'print_admission_form' student.pk %}" target="_blank" class="btn btn-secondary btn-sm fw-bold action-btn">
+                        📝 Form
+                    </a>
+
+                    <button onclick="window.print()" class="btn btn-light btn-sm fw-bold action-btn text-primary">
+                        🖨️ Print Profile
+                    </button>
+
+                    <a href="{% url 'student_list' %}" class="btn btn-outline-light btn-sm action-btn">Back</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-body p-5">
+            <div class="row mb-4 border-bottom pb-4">
+                <div class="col-md-2 text-center">
+                    {% if student.photo %}
+                        <img src="{{ student.photo.url }}" class="img-thumbnail rounded-circle" style="width: 120px; height: 120px; object-fit: cover;">
+                    {% else %}
+                        <div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto" style="width: 120px; height: 120px; font-size: 40px;">
+                            {{ student.first_name|first }}
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="col-md-10">
+                    <h2 class="fw-bold text-uppercase">{{ student.first_name }} {{ student.last_name }}</h2>
+                    <p class="text-muted mb-1">Admission No: <strong>{{ student.admission_no }}</strong></p>
+                    <p class="text-muted mb-1">Class: <strong>{{ student.current_class.name }} - {{ student.section.name }}</strong></p>
+                    <p class="text-muted">Status: <span class="badge bg-success">{{ student.status|upper }}</span></p>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <h5 class="text-primary border-bottom pb-2">👤 Personal Details</h5>
+                    <table class="table table-borderless">
+                        <tr><td width="40%" class="text-muted">Date of Birth:</td><td class="fw-bold">{{ student.dob }}</td></tr>
+                        <tr><td class="text-muted">Gender:</td><td class="fw-bold">{{ student.get_gender_display }}</td></tr>
+                        <tr><td class="text-muted">Blood Group:</td><td class="fw-bold">{{ student.blood_group|default:"-" }}</td></tr>
+                        <tr><td class="text-muted">Category:</td><td class="fw-bold">{{ student.category|default:"-" }}</td></tr>
+                        <tr><td class="text-muted">Aadhar No:</td><td class="fw-bold">{{ student.aadhar_no|default:"-" }}</td></tr>
+                    </table>
+                </div>
+                <div class="col-md-6">
+                    <h5 class="text-primary border-bottom pb-2">👨‍👩‍👦 Parents Info</h5>
+                    <table class="table table-borderless">
+                        <tr><td width="40%" class="text-muted">Father's Name:</td><td class="fw-bold">{{ student.father_name }}</td></tr>
+                        <tr><td class="text-muted">Mother's Name:</td><td class="fw-bold">{{ student.mother_name|default:"-" }}</td></tr>
+                        <tr><td class="text-muted">Occupation:</td><td class="fw-bold">{{ student.father_occupation|default:"-" }}</td></tr>
+                        <tr><td class="text-muted">Mobile:</td><td class="fw-bold">{{ student.father_mobile }}</td></tr>
+                        <tr><td class="text-muted">Address:</td><td>{{ student.address }}</td></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer text-center text-muted small">
+            Generated on {% now "d M Y" %} by {{ request.user.username }}
+        </div>
+    </div>
+</div>
+{% endblock %}

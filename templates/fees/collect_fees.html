@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    
+    <div class="text-center mb-4">
+        <h2 class="fw-bold text-primary">💰 Fee Collection Counter</h2>
+    </div>
+
+    <div class="card shadow-sm mb-4 bg-light border-0">
+        <div class="card-body">
+            <form method="get" class="row g-2 justify-content-center align-items-center">
+                <div class="col-auto">
+                    <label class="fw-bold">Student Admission No:</label>
+                </div>
+                <div class="col-md-4">
+                    <input type="text" name="admission_no" class="form-control" 
+                           placeholder="Enter Adm No (e.g. 101)" value="{{ search_adm_no|default:'' }}" required>
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-primary px-4">🔍 Search</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% if student %}
+    <div class="row">
+        
+        <div class="col-md-6">
+            <div class="card shadow mb-3 h-100">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">👤 Student Details</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        {% if student.photo %}
+                            <img src="{{ student.photo.url }}" class="rounded-circle border me-3" width="60" height="60">
+                        {% endif %}
+                        <div>
+                            <h4 class="mb-0">{{ student.first_name }} {{ student.last_name }}</h4>
+                            <span class="badge bg-info text-dark">{{ student.current_class.name }} - {{ student.section.name }}</span>
+                        </div>
+                    </div>
+                    <p class="mb-1"><strong>Father Name:</strong> {{ student.father_name }}</p>
+                    <p class="mb-1"><strong>Mobile:</strong> {{ student.father_mobile }}</p>
+                    <hr>
+
+                    <h6 class="text-secondary fw-bold">Fee Structure (Rate Card)</h6>
+                    <ul class="list-group mb-3">
+                        {% for fee in fee_structures %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                {{ fee.category.name }}
+                                <span>₹{{ fee.amount }}</span>
+                            </li>
+                        {% empty %}
+                            <li class="list-group-item text-muted">No fee structure set for this class.</li>
+                        {% endfor %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center bg-light fw-bold">
+                            Total Payable Fees
+                            <span>₹{{ total_fee }}</span>
+                        </li>
+                    </ul>
+
+                    <div class="alert {% if balance > 0 %}alert-danger{% else %}alert-success{% endif %}">
+                        <div class="d-flex justify-content-between">
+                            <span>Total Paid: <strong>₹{{ total_paid }}</strong></span>
+                            <span>Balance Due: <strong>₹{{ balance }}</strong></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card shadow border-success h-100">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">💸 Receive Payment</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Amount to Collect (₹)</label>
+                            <input type="number" name="amount" class="form-control form-control-lg border-success" 
+                                   placeholder="Enter amount" max="{{ balance }}" step="0.01" required>
+                            <div class="form-text text-muted">Max collectible: ₹{{ balance }}</div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Payment Date</label>
+                                <input type="date" name="date" class="form-control" value="{% now 'Y-m-d' %}" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Payment Mode</label>
+                                <select name="mode" class="form-select">
+                                    <option value="cash" selected>💵 Cash</option>
+                                    <option value="online">📱 Online / UPI</option>
+                                    <option value="cheque">🏦 Cheque</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">Remarks (Optional)</label>
+                            <textarea name="remarks" class="form-control" rows="2" placeholder="Ex: Transaction ID..."></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-success w-100 btn-lg shadow-sm">
+                            ✅ Confirm & Print Receipt
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% elif search_adm_no %}
+        <div class="alert alert-warning text-center mt-4">
+            <h4>⚠️ Student Not Found</h4>
+            <p>No student found with Admission No: <strong>{{ search_adm_no }}</strong> in your school.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

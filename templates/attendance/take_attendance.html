@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mb-4 text-primary">📅 Daily Attendance Register</h2>
+
+    <div class="card shadow-sm mb-4 bg-light">
+        <div class="card-body">
+            <form method="get" class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label>Select Date</label>
+                    <input type="date" name="date" class="form-control" value="{{ selected_date }}" required>
+                </div>
+                <div class="col-md-3">
+                    <label>Class</label>
+                    <select name="class_grade" class="form-select" required>
+                        <option value="">-- Select Class --</option>
+                        {% for cls in classes %}
+                            <option value="{{ cls.id }}" {% if cls.id == selected_class_id %}selected{% endif %}>
+                                {{ cls.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label>Section</label>
+                    <select name="section" class="form-select" required>
+                        <option value="">-- Select Section --</option>
+                        {% for sec in sections %}
+                            <option value="{{ sec.id }}" {% if sec.id == selected_section_id %}selected{% endif %}>
+                                {{ sec.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-primary w-100">Load Students</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% if students_data %}
+    <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="class_id" value="{{ selected_class_id }}">
+        <input type="hidden" name="section_id" value="{{ selected_section_id }}">
+        <input type="hidden" name="date" value="{{ selected_date }}">
+
+        <div class="card shadow">
+            <div class="card-header bg-dark text-white d-flex justify-content-between">
+                <span>Students List</span>
+                <span>
+                    {% if session_obj %}
+                        <span class="badge bg-warning text-dark">Editing Existing Record</span>
+                    {% else %}
+                        <span class="badge bg-success">New Entry</span>
+                    {% endif %}
+                </span>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0 align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Roll No</th>
+                            <th>Student Name</th>
+                            <th class="text-center">Status (P / A / L)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in students_data %}
+                        <tr>
+                            <td>{{ item.student.roll_number|default:"-" }}</td>
+                            <td>
+                                <strong>{{ item.student.first_name }} {{ item.student.last_name }}</strong>
+                            </td>
+                            <td class="text-center">
+                                <div class="btn-group" role="group">
+                                    <input type="radio" class="btn-check" name="status_{{ item.student.id }}" id="P_{{ item.student.id }}" value="P" 
+                                           {% if item.status == 'P' %}checked{% endif %}>
+                                    <label class="btn btn-outline-success" for="P_{{ item.student.id }}">Present</label>
+
+                                    <input type="radio" class="btn-check" name="status_{{ item.student.id }}" id="A_{{ item.student.id }}" value="A" 
+                                           {% if item.status == 'A' %}checked{% endif %}>
+                                    <label class="btn btn-outline-danger" for="A_{{ item.student.id }}">Absent</label>
+
+                                    <input type="radio" class="btn-check" name="status_{{ item.student.id }}" id="L_{{ item.student.id }}" value="L" 
+                                           {% if item.status == 'L' %}checked{% endif %}>
+                                    <label class="btn btn-outline-warning" for="L_{{ item.student.id }}">Late</label>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="card-footer text-end">
+                <button type="submit" class="btn btn-success btn-lg px-5">💾 Save Attendance</button>
+            </div>
+        </div>
+    </form>
+    {% elif selected_class_id %}
+        <div class="alert alert-warning text-center">No students found in this Class/Section.</div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <h2 class="text-primary mb-4">🏆 Exam Result Center</h2>
+
+    <div class="card shadow-sm bg-light mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label>Select Exam</label>
+                    <select name="exam" class="form-select" required>
+                        <option value="">-- Choose Exam --</option>
+                        {% for ex in exams %}
+                            <option value="{{ ex.id }}" {% if ex.id == sel_exam %}selected{% endif %}>
+                                {{ ex.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label>Select Class</label>
+                    <select name="class_grade" class="form-select" required>
+                        <option value="">-- Choose Class --</option>
+                        {% for cls in classes %}
+                            <option value="{{ cls.id }}" {% if cls.id == sel_class %}selected{% endif %}>
+                                {{ cls.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-primary w-100">Show Students</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% if students %}
+    <div class="card shadow border-0">
+        <div class="card-header bg-dark text-white">
+            <h5 class="mb-0">🎓 Students in Selected Class</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0 align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Roll No</th>
+                            <th>Name</th>
+                            <th>Father Name</th>
+                            <th class="text-end">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for std in students %}
+                        <tr>
+                            <td>{{ std.roll_number|default:"-" }}</td>
+                            <td class="fw-bold">{{ std.first_name }} {{ std.last_name }}</td>
+                            <td>{{ std.father_name }}</td>
+                            <td class="text-end">
+                                <a href="{% url 'student_report_card' std.id sel_exam %}" target="_blank" class="btn btn-sm btn-warning">
+                                    🖨️ Print Report
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% elif sel_exam %}
+        <div class="alert alert-info text-center">No students found.</div>
+    {% endif %}
+</div>
+{% endblock %}

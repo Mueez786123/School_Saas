@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5 text-center">
+    <div class="card shadow border-danger">
+        <div class="card-header bg-danger text-white">
+            <h4>🚫 Access Denied</h4>
+        </div>
+        <div class="card-body">
+            <p class="lead">{{ message }}</p>
+            <hr>
+            <p>Aapka account active hai, lekin koi School assigned nahi hai.</p>
+            
+            <div class="d-grid gap-2 col-6 mx-auto">
+                {% if user.is_superuser %}
+                    <a href="/admin/" class="btn btn-dark">⚙️ Go to Admin Panel</a>
+                {% endif %}
+                
+                <form action="{% url 'logout' %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-danger w-100">Logout</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

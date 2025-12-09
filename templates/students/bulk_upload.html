@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8"> <div class="card shadow-lg border-0">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0"><i class="bi bi-file-earmark-spreadsheet-fill"></i> Bulk Student Upload</h4>
+                </div>
+                <div class="card-body p-4">
+                    <div class="alert alert-info">
+                        <strong>💡 Instructions:</strong>
+                        <ol>
+                            <li>Upload Excel (`.xlsx`) file.</li>
+                            <li>
+                                <strong>Columns Names (Header) must be exactly like this:</strong><br>
+                                <span class="badge bg-light text-dark border mt-2">First Name</span>
+                                <span class="badge bg-light text-dark border mt-2">Last Name</span>
+                                <span class="badge bg-light text-dark border mt-2">Admission No</span>
+                                <span class="badge bg-light text-dark border mt-2">Roll Number</span>
+                                <span class="badge bg-light text-dark border mt-2">Class</span>
+                                <span class="badge bg-light text-dark border mt-2">Section</span>
+                                <span class="badge bg-light text-dark border mt-2">Father Name</span>
+                                <span class="badge bg-light text-dark border mt-2">Mother Name</span>
+                                <span class="badge bg-light text-dark border mt-2">Mobile</span>
+                                <span class="badge bg-light text-dark border mt-2">Gender</span>
+                                <span class="badge bg-light text-dark border mt-2">Aadhar No</span>
+                                <span class="badge bg-light text-dark border mt-2">Category</span>
+                                <span class="badge bg-light text-dark border mt-2">Religion</span>
+                                <span class="badge bg-light text-dark border mt-2">Blood Group</span>
+                            </li>
+                            <li class="mt-2">Values for <strong>Category</strong>: General, OBC, SC, ST</li>
+                            <li>Values for <strong>Blood Group</strong>: A+, B+, O+, AB+</li>
+                        </ol>
+                    </div>
+
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Select Excel File</label>
+                            <input type="file" name="excel_file" class="form-control form-control-lg" accept=".xlsx, .xls" required>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-success btn-lg">🚀 Upload & Import Data</button>
+                        </div>
+                    </form>
+                    
+                    <div class="text-center mt-3">
+                        <a href="{% url 'student_list' %}" class="text-decoration-none">← Back to Student List</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

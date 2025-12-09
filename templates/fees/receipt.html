@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Fee Receipt #{{ payment.id }}</title>
+    <style>
+        body { font-family: 'Times New Roman', serif; background: #555; margin: 0; padding: 20px; }
+        
+        /* A4 Page Layout */
+        .a4-page {
+            width: 210mm;
+            min-height: 297mm;
+            background: #fff;
+            margin: 0 auto;
+            padding: 10mm;
+            box-shadow: 0 0 15px rgba(0,0,0,0.5);
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        /* Receipt Box (Two copies on one page) */
+        .receipt-copy {
+            border: 2px solid #000;
+            padding: 15px;
+            margin-bottom: 20px; /* Space between copies */
+            height: 130mm; /* Half page approx */
+            position: relative;
+        }
+
+        /* Header */
+        .header { text-align: center; border-bottom: 1px solid #000; padding-bottom: 10px; margin-bottom: 15px; }
+        .school-name { font-size: 24px; font-weight: bold; text-transform: uppercase; margin: 5px 0; }
+        .receipt-title { 
+            text-align: center; background: #000; color: #fff; 
+            display: inline-block; padding: 3px 15px; 
+            font-weight: bold; text-transform: uppercase; border-radius: 15px;
+            font-size: 12px; margin-bottom: 10px;
+        }
+
+        /* Info Grid */
+        .info-table { width: 100%; margin-bottom: 10px; font-size: 14px; }
+        .info-table td { padding: 3px; }
+        .label { font-weight: bold; width: 15%; }
+
+        /* Amount Table */
+        .amount-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
+        .amount-table th, .amount-table td { border: 1px solid #000; padding: 6px; text-align: left; }
+        .amount-table th { background-color: #f0f0f0; text-align: center; }
+        .amount-table .amount { text-align: right; }
+
+        /* Footer */
+        .footer { margin-top: 30px; display: flex; justify-content: space-between; font-size: 12px; text-align: center; }
+        .sign-line { border-top: 1px solid #000; width: 120px; padding-top: 5px; font-weight: bold; }
+
+        /* Watermark */
+        .copy-label {
+            position: absolute; top: 10px; right: 10px; 
+            font-size: 10px; border: 1px solid #000; padding: 2px 5px;
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+
+        /* Buttons (Non-Print) */
+        .no-print-bar {
+            position: fixed; top: 0; left: 0; width: 100%;
+            background: rgba(0,0,0,0.8); padding: 10px;
+            text-align: center; z-index: 1000;
+        }
+        .btn {
+            padding: 10px 20px; border: none; border-radius: 5px; 
+            color: white; font-weight: bold; cursor: pointer; text-decoration: none;
+            margin: 0 5px; font-family: sans-serif; font-size: 14px;
+        }
+        .btn-print { background: #0d6efd; }
+        .btn-whatsapp { background: #198754; }
+        .btn-home { background: #ffc107; color: #000; }
+        .btn-back { background: #6c757d; }
+
+        @media print {
+            body { background: none; padding: 0; }
+            .a4-page { box-shadow: none; margin: 0; border: none; width: 100%; padding: 5mm; }
+            .no-print-bar { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="no-print-bar">
+        <button onclick="window.print()" class="btn btn-print">🖨️ Print Receipt</button>
+        
+        <a href="{{ whatsapp_url }}" target="_blank" class="btn btn-whatsapp">📲 Send WhatsApp</a>
+        
+        <a href="{% url 'dashboard' %}" class="btn btn-home">🏠 Home</a>
+        <a href="javascript:history.back()" class="btn btn-back">⬅️ Back</a>
+    </div>
+
+    <div class="a4-page">
+        
+        <div class="receipt-copy">
+            <span class="copy-label">Student Copy</span>
+            <div class="header">
+                {% if payment.school.logo %}
+                    <img src="{{ payment.school.logo.url }}" height="50">
+                {% endif %}
+                <div class="school-name">{{ payment.school.name }}</div>
+                <div style="font-size: 12px;">{{ payment.school.address }}</div>
+            </div>
+            <div style="text-align: center;"><span class="receipt-title">FEE RECEIPT</span></div>
+
+            <table class="info-table">
+                <tr>
+                    <td class="label">Receipt No:</td> <td>#{{ payment.id }}</td>
+                    <td class="label">Date:</td> <td>{{ payment.payment_date }}</td>
+                </tr>
+                <tr>
+                    <td class="label">Student Name:</td> <td><b>{{ payment.student.first_name }} {{ payment.student.last_name }}</b></td>
+                    <td class="label">Class:</td> <td>{{ payment.student.current_class.name }} ({{ payment.student.section.name }})</td>
+                </tr>
+                <tr>
+                    <td class="label">Father Name:</td> <td>{{ payment.student.father_name }}</td>
+                    <td class="label">Roll No:</td> <td>{{ payment.student.roll_number|default:"-" }}</td>
+                </tr>
+            </table>
+
+            <table class="amount-table">
+                <tr>
+                    <th>Description / Particulars</th>
+                    <th width="30%">Amount (₹)</th>
+                </tr>
+                <tr>
+                    <td>Tuition / School Fees <br> <small><i>(Mode: {{ payment.get_mode_display }})</i></small></td>
+                    <td class="amount">{{ payment.amount_paid }}</td>
+                </tr>
+                {% if payment.remarks %}
+                <tr>
+                    <td><small>Remarks: {{ payment.remarks }}</small></td>
+                    <td class="amount">-</td>
+                </tr>
+                {% endif %}
+                <tr>
+                    <td style="text-align: right; font-weight: bold;">TOTAL PAID</td>
+                    <td class="amount" style="font-weight: bold; background: #f9f9f9;">₹{{ payment.amount_paid }}</td>
+                </tr>
+            </table>
+
+            <div class="footer">
+                <div>
+                    <br>
+                    Parent's Signature
+                </div>
+                <div>
+                    <div class="sign-line">Accountant / Cashier</div>
+                </div>
+            </div>
+        </div>
+
+        <div style="border-top: 2px dashed #999; margin: 20px 0; text-align: center; font-size: 10px; color: #555;">
+            ✂️ Cut Here ✂️
+        </div>
+
+        <div class="receipt-copy">
+            <span class="copy-label">Office Copy</span>
+            <div class="header">
+                {% if payment.school.logo %}
+                    <img src="{{ payment.school.logo.url }}" height="50">
+                {% endif %}
+                <div class="school-name">{{ payment.school.name }}</div>
+                <div style="font-size: 12px;">{{ payment.school.address }}</div>
+            </div>
+            <div style="text-align: center;"><span class="receipt-title">FEE RECEIPT</span></div>
+
+            <table class="info-table">
+                <tr>
+                    <td class="label">Receipt No:</td> <td>#{{ payment.id }}</td>
+                    <td class="label">Date:</td> <td>{{ payment.payment_date }}</td>
+                </tr>
+                <tr>
+                    <td class="label">Student Name:</td> <td><b>{{ payment.student.first_name }} {{ payment.student.last_name }}</b></td>
+                    <td class="label">Class:</td> <td>{{ payment.student.current_class.name }} ({{ payment.student.section.name }})</td>
+                </tr>
+            </table>
+
+            <table class="amount-table">
+                <tr>
+                    <th>Description</th>
+                    <th width="30%">Amount (₹)</th>
+                </tr>
+                <tr>
+                    <td>Tuition / School Fees <br> <small><i>(Mode: {{ payment.get_mode_display }})</i></small></td>
+                    <td class="amount">{{ payment.amount_paid }}</td>
+                </tr>
+                <tr>
+                    <td style="text-align: right; font-weight: bold;">TOTAL PAID</td>
+                    <td class="amount" style="font-weight: bold;">₹{{ payment.amount_paid }}</td>
+                </tr>
+            </table>
+
+            <div class="footer">
+                <div>
+                    <br>
+                    Checked By
+                </div>
+                <div>
+                    <div class="sign-line">Authorized Signatory</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>
